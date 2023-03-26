@@ -3,17 +3,20 @@ import traceback
 from tkinter import ttk
 from tkinter import filedialog
 from pathlib import Path
+import moviepy.editor as moviepy
 from threading import Thread
-
 import jump_cutter_main
 from jump_cutter_main import jump_cutter_main
 
+
+#etc.
 
 class JumpCutterGUI:
     def __init__(self, master):
         self.master = master
         master.title("Jump Cutter")
-        self.run_button = tk.Button(master, text="Run", command=self.execute_jump_cutter)
+        self.run_button = tk.Button(master, text="Run", command=self.run_main_with_progress)
+        self.min_loud_part_duration_var = tk.BooleanVar()
 
         self.silence_part_speed_var = tk.BooleanVar()
         self.silence_part_speed_checkbox = tk.Checkbutton(master, text="Include", variable=self.silence_part_speed_var)
@@ -53,6 +56,7 @@ class JumpCutterGUI:
 
         self.min_loud_part_duration_label = tk.Label(master, text="Minimum loud part duration:")
         self.min_loud_part_duration_entry = tk.Entry(master)
+        self.min_loud_part_duration_checkbox = tk.Checkbutton(master, text="Include", variable=self.min_loud_part_duration_var)
 
         self.codec_label = tk.Label(master, text="Codec:")
         self.codec_entry = tk.Entry(master)
@@ -70,7 +74,7 @@ class JumpCutterGUI:
         # ... Add more labels, entries, and checkboxes for other optional arguments ...
 
         # Button to run the jump cutter
-        self.run_button = tk.Button(master, text="Run", command=self.run_jump_cutter)
+        self.run_button = tk.Button(master, text="Run", command=self.run_main_with_progress)
 
         # Progress bar and information text
         self.progress_bar = ttk.Progressbar(master, mode="indeterminate")
@@ -123,10 +127,7 @@ class JumpCutterGUI:
         self.info_text.grid(row=22, column=0, columnspan=3)
 
         # Initialize the checkbox variables
-        self.silence_part_speed_var = tk.BooleanVar()
-        self.cut_var = tk.BooleanVar()
-        self.codec_var = tk.BooleanVar()
-        self.bitrate_var = tk.BooleanVar()
+
     def find_optimized_parameters(self):
         # Implement a machine learning model or heuristic-based approach to estimate the best parameters
         # This is a complex task and requires a large dataset of videos and their associated optimal parameters
@@ -147,7 +148,12 @@ class JumpCutterGUI:
         self.space_on_edges_entry.delete(0, tk.END)
         self.space_on_edges_entry.insert(0, optimized_space_on_edges)
 
-    def execute_jump_cutter(self):
+    def execute_jump_cutter(self, args):
+        try:
+            jump_cutter_main(args)
+        except Exception:
+            traceback.print_exc()
+    #def execute_jump_cutter(self):
         args = []
         input_path = self.input_entry.get()
         output_path = self.output_entry.get()
@@ -183,6 +189,7 @@ class JumpCutterGUI:
 
         try:
             jump_cutter_main(args)
+
         except Exception:
             traceback.print_exc()
 
@@ -219,17 +226,26 @@ class JumpCutterGUI:
             args.extend(['--codec', self.codec_entry.get()])
             if self.bitrate_var.get() and self.bitrate_entry.get():
                 args.extend(['--bitrate', self.bitrate_entry.get()])
-            if self.cut_combobox.get():  # fix typo here
-                args.extend(['--cut', self.cut_combobox.get()])
+            if self.cut_checkbox.get():
+                args.extend(['--cut', self.cut_checkbox.get()])
 
         # Call execute_jump_cutter method to run jump_cutter_main
+
         try:
             self.execute_jump_cutter(args)
         except Exception as e:
-            tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
+            #tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
+            tb_str = traceback.format_exception(type(e), e, e.__traceback__)
+
             error_str = ''.join(tb_str)
             self.info_text.insert(tk.END, f"An error occurred during processing:\n{error_str}\n")
             self.info_text.see(tk.END)
+
+    def execute_jump_cutter(self, args):
+        try:
+            jump_cutter_main(args)
+        except Exception:
+            traceback.print_exc()
 
     def run_main_with_progress(self, args):
         self.run_button.config(state=tk.DISABLED)

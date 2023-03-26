@@ -1,7 +1,0 @@
-*
-
-!docker
-!jumpcutter/*
-!pyproject.toml
-!poetry.lock
-!README.md

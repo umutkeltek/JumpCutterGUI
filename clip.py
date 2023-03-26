@@ -4,9 +4,12 @@ import numpy as np
 
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 from moviepy.editor import VideoFileClip, concatenate_videoclips
-from moviepy.video.fx.all import speedx
+from moviepy.video.fx import speedx
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from tqdm import tqdm
+
+
+
 
 
 class Clip:
@@ -127,3 +130,6 @@ class Audio:
                 silence_counter = 0
                 failure_counter = 0
         return intervals_to_cut
+
+#if __name__ == "__main__":
+    #main()

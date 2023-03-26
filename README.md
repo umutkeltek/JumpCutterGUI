@@ -30,6 +30,8 @@ Bitrate: Set the bitrate for the output video file (optional).
 Cut: Choose which parts to remove or include in the output video (silent, voiced, or both).
 
 Once you have configured the desired settings, click the "Run" button to start processing the video. A progress bar will indicate the progress of the process.
+
+
 ![image](https://user-images.githubusercontent.com/35880258/227778348-bd7255c9-18d5-4ae4-addb-7847fea20d52.png)
 
 ## Code Explanation ##

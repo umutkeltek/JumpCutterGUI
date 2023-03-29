@@ -152,9 +152,11 @@ class Audio:
         intervals_to_cut = []
         absolute_signal = np.absolute(self.signal)
         for i, values in tqdm(
+
             enumerate(absolute_signal),
             desc="Getting silent intervals to cut",
             total=len(absolute_signal),
+            file=sys.stderr
         ):
             silence = all([value < magnitude_threshold for value in values])
             silence_counter += silence

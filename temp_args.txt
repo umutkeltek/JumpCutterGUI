@@ -1,0 +1,3 @@
+--input C:/Users/umutk/Downloads/ChatGPT API in Python.mp4
+--output ChatGPT API in Python_autocut.mp4
+--magnitude-threshold-ratio 0.03

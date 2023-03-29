@@ -1,12 +1,17 @@
 import argparse
+import os
+import sys
 
 from pathlib import Path
+import traceback
 
-from jumpcutter.clip import Clip
+from clip import Clip
 
 
-def main() -> None:
+def main(args_list=None) -> None:
     parser = argparse.ArgumentParser()
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
+    sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 1)
 
     parser.add_argument(
         "--input", "-i", help="Path to the input video", type=Path, required=True
@@ -93,8 +98,11 @@ def main() -> None:
         type=int,
         required=False,
     )
+    if args_list is not None:
+        args = parser.parse_args(args_list)
+    else:
+        args = parser.parse_args()
 
-    args = parser.parse_args()
     print("Running with the arguments:")
     print(args)
     print(60 * "-")
@@ -108,6 +116,7 @@ def main() -> None:
 
     input_path = args.input.resolve()
     output_path = args.output.resolve()
+
     cuts = [args.cut] if args.cut != "both" else ["silent", "voiced"]
     codec = args.codec
     bitrate = args.bitrate

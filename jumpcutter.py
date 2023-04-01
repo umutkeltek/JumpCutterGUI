@@ -10,8 +10,8 @@ from clip import Clip
 
 def main(args_list=None) -> None:
     parser = argparse.ArgumentParser()
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
-    sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 1)
+    sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
+    sys.stderr = open(sys.stderr.fileno(), mode='w', encoding='utf-8', buffering=1)
 
     parser.add_argument(
         "--input", "-i", help="Path to the input video", type=Path, required=True

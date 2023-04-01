@@ -7,6 +7,7 @@ from pathlib import Path
 import logging
 import subprocess
 import sys
+import threading
 import os
 from threading import Thread
 from jumpcutter import main as jumpcutter_main
@@ -310,7 +311,7 @@ class JumpCutterGUI:
             '--magnitude-threshold-ratio', str(self.magnitude_threshold_ratio_slider.get())
         ]
         temp_args_file = 'temp_args.txt'
-        with open(temp_args_file, 'w') as f:
+        with open(temp_args_file, 'w', encoding='utf-8') as f:
             # Add a line for each argument
             f.write(f'--input {self.input_entry.get()}\n')
             f.write(f'--output {self.output_entry.get()}\n')
@@ -335,18 +336,9 @@ class JumpCutterGUI:
             if self.cut_checkbox.get():
                 args.extend(['--cut', self.cut_checkbox.get()])
 
-        # Call execute_jump_cutter method to run jump_cutter_main
-        if sys.platform == "win32":
-            command = f'start cmd.exe /k "python jump_cutter_script.py --args-from-file {args}"'
-        elif sys.platform == "darwin":
-            command = f'osascript -e \'tell app "Terminal" to do script "python jump_cutter_script.py --args-from-file {args}"\''
-        else:  # Linux and other Unix-based systems
-            command = f'xterm -e "python jump_cutter_script.py --args-from-file {args}"'
-        # Execute the command to open the new terminal
-        subprocess.Popen(command, shell=True)
 
         try:
-            jumpcutter_main(args)  # Use jumpcutter_main instead of __main__.main(args)
+            #jumpcutter_main(args)  # Use jumpcutter_main instead of __main__.main(args)
             self.info_text.insert(tk.END, "Video processing completed successfully.\n")
             self.info_text.see(tk.END)
             logging.debug("Successfully executed some code")
@@ -357,6 +349,9 @@ class JumpCutterGUI:
             self.info_text.insert(tk.END, f"An error occurred during processing:\n{error_str}\n")
             self.info_text.see(tk.END)
             logging.error(f"Error encountered: {e}")
+
+        jump_cutter_thread = threading.Thread(target=self.execute_jump_cutter, args=(args,))
+        jump_cutter_thread.start()
 
     def run_main_with_progress(self, args):  # Add 'args' as an argument
         logging.debug("Run button clicked")
@@ -366,12 +361,10 @@ class JumpCutterGUI:
         self.info_text.see(tk.END)
 
         try:
-            jumpcutter_main(args)  # Use jumpcutter_main instead of __main__.main(args)
+            self.execute_jump_cutter(args)  # Pass the args to execute_jump_cutter
             self.info_text.insert(tk.END, "Video processing completed successfully.\n")
             self.info_text.see(tk.END)
             logging.debug("Successfully executed some code")
-
-
         except Exception as e:
             tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
             error_str = ''.join(tb_str)
@@ -379,8 +372,8 @@ class JumpCutterGUI:
             self.info_text.see(tk.END)
             logging.error(f"Error encountered: {e}")
 
-        self.progress_bar.stop()
         self.run_button.config(state=tk.NORMAL)
+        self.progress_bar.stop()
 
 
 if __name__ == "__main__":

@@ -252,7 +252,18 @@ class JumpCutterGUI:
             traceback.print_exc()
 
     def browse_input(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Video files", "*.mp4;*.mkv;*.avi;*.mov;*.flv;*.wmv")])
+        if sys.platform == 'darwin':  # For macOS
+            filetypes = [
+                ("Video files", "public.movie"),
+                ("All files", "public.item")
+            ]
+        else:  # For Windows and Linux
+            filetypes = [
+                ("Video files", "*.mp4 *.mkv *.avi *.mov *.flv *.wmv"),
+                ("All files", "*.*")
+            ]
+
+        file_path = filedialog.askopenfilename(filetypes=filetypes)
         self.input_entry.delete(0, tk.END)
         self.input_entry.insert(0, file_path)
 

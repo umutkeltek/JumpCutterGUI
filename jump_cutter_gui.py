@@ -1,56 +1,26 @@
-import sys
 import tkinter as tk
 import traceback
 from tkinter import ttk
 from tkinter import filedialog
 from pathlib import Path
-import logging
-import subprocess
-import sys
-import threading
-import os
-from threading import Thread
-from jumpcutter import main as jumpcutter_main
-from moviepy.editor import VideoFileClip, concatenate_videoclips, TextClip, CompositeVideoClip
 import moviepy.editor as moviepy
-from moviepy.video.fx.accel_decel import accel_decel
-from moviepy.video.fx.blackwhite import blackwhite
-from moviepy.video.fx.blink import blink
-from moviepy.video.fx.colorx import colorx
-from moviepy.video.fx.crop import crop
-from moviepy.video.fx.even_size import even_size
-from moviepy.video.fx.fadein import fadein
-from moviepy.video.fx.fadeout import fadeout
-from moviepy.video.fx.freeze import freeze
-from moviepy.video.fx.freeze_region import freeze_region
-from moviepy.video.fx.gamma_corr import gamma_corr
-from moviepy.video.fx.headblur import headblur
-from moviepy.video.fx.invert_colors import invert_colors
-from moviepy.video.fx.loop import loop
-from moviepy.video.fx.lum_contrast import lum_contrast
-from moviepy.video.fx.make_loopable import make_loopable
-from moviepy.video.fx.margin import margin
-from moviepy.video.fx.mask_and import mask_and
-from moviepy.video.fx.mask_color import mask_color
-from moviepy.video.fx.mask_or import mask_or
-from moviepy.video.fx.mirror_x import mirror_x
-from moviepy.video.fx.mirror_y import mirror_y
-from moviepy.video.fx.painting import painting
-from moviepy.video.fx.resize import resize
-from moviepy.video.fx.rotate import rotate
-from moviepy.video.fx.scroll import scroll
-from moviepy.video.fx.speedx import speedx
-from moviepy.video.fx.supersample import supersample
-from moviepy.video.fx.time_mirror import time_mirror
-from moviepy.video.fx.time_symmetrize import time_symmetrize
+from threading import Thread
+from jumpcutter import main as jump_cutter_main
+import sys
 from moviepy.audio.fx.audio_fadein import audio_fadein
 from moviepy.audio.fx.audio_fadeout import audio_fadeout
 from moviepy.audio.fx.audio_left_right import audio_left_right
 from moviepy.audio.fx.audio_loop import audio_loop
 from moviepy.audio.fx.audio_normalize import audio_normalize
 from moviepy.audio.fx.volumex import volumex
+import logging
+import subprocess
+import sys
+import os
+from threading import Thread
+from jumpcutter import main as jumpcutter_main
+from moviepy.editor import VideoFileClip, concatenate_videoclips, TextClip, CompositeVideoClip
 #etc.
-
 
 class JumpCutterGUI:
     def __init__(self, master):
@@ -86,7 +56,7 @@ class JumpCutterGUI:
 
         self.failure_tolerance_ratio_label = tk.Label(master, text="Failure tolerance ratio:")
         self.failure_tolerance_ratio_entry = tk.Entry(master)
-        master.protocol("WM_DELETE_WINDOW", self.close_application)
+
         self.space_on_edges_label = tk.Label(master, text="Space on edges:")
         self.space_on_edges_entry = tk.Entry(master)
         # Add a new button for optimized parameters
@@ -116,13 +86,7 @@ class JumpCutterGUI:
 
         # ... Add more labels, entries, and checkboxes for other optional arguments ...
 
-        import logging
 
-        logging.basicConfig(
-            filename="jump_cutter_gui.log",
-            level=logging.DEBUG,
-            format="%(asctime)s [%(levelname)s] %(message)s",
-        )
 
         # Progress bar and information text
         self.progress_bar = ttk.Progressbar(master, mode="indeterminate")
@@ -188,10 +152,6 @@ class JumpCutterGUI:
         self.update_bitrate_entry_state()
         self.update_cut_combobox_state()
 
-    def close_application(self):
-        self.master.destroy()
-        sys.exit(0)
-
     def update_silence_part_speed_entry_state(self, *args):
         if self.silence_part_speed_var.get():
             self.silence_part_speed_entry.config(state=tk.NORMAL)
@@ -248,7 +208,7 @@ class JumpCutterGUI:
 
     def execute_jump_cutter(self, args):
         try:
-            jumpcutter_main(args)  # Use jumpcutter_main instead of __main__.main(args)
+            jump_cutter_main(args)
         except Exception:
             traceback.print_exc()
     #def execute_jump_cutter(self):
@@ -286,12 +246,10 @@ class JumpCutterGUI:
         args.extend(['--output', output_path])
 
         try:
-            self.run_main_with_progress(args)  # Pass the args to run_main_with_progress
-        except Exception as e:
-            tb_str = traceback.format_exception(type(e), e, e.__traceback__)
-            error_str = ''.join(tb_str)
-            self.info_text.insert(tk.END, f"An error occurred during processing:\n{error_str}\n")
-            self.info_text.see(tk.END)
+            jump_cutter_main(args)
+
+        except Exception:
+            traceback.print_exc()
 
     def browse_input(self):
         file_path = filedialog.askopenfilename(filetypes=[("Video files", "*.mp4;*.mkv;*.avi;*.mov;*.flv;*.wmv")])
@@ -303,20 +261,12 @@ class JumpCutterGUI:
         self.output_entry.delete(0, tk.END)
         self.output_entry.insert(0, output_path)
 
-
     def run_jump_cutter(self):
         args = [
             '-i', self.input_entry.get(),
             '-o', self.output_entry.get(),
             '--magnitude-threshold-ratio', str(self.magnitude_threshold_ratio_slider.get())
         ]
-        temp_args_file = 'temp_args.txt'
-        with open(temp_args_file, 'w', encoding='utf-8') as f:
-            # Add a line for each argument
-            f.write(f'--input {self.input_entry.get()}\n')
-            f.write(f'--output {self.output_entry.get()}\n')
-            f.write(f'--magnitude-threshold-ratio {self.magnitude_threshold_ratio_slider.get()}\n')
-            # Add more lines for other arguments as necessary
 
         # Add optional arguments if the checkboxes are checked
         if self.duration_threshold_entry.get():
@@ -336,44 +286,40 @@ class JumpCutterGUI:
             if self.cut_checkbox.get():
                 args.extend(['--cut', self.cut_checkbox.get()])
 
+        # Call execute_jump_cutter method to run jump_cutter_main
 
         try:
-            #jumpcutter_main(args)  # Use jumpcutter_main instead of __main__.main(args)
-            self.info_text.insert(tk.END, "Video processing completed successfully.\n")
-            self.info_text.see(tk.END)
-            logging.debug("Successfully executed some code")
-
+            self.run_main_with_progress(args)  # Pass the args to run_main_with_progress
         except Exception as e:
-            tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
+            #tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
+            tb_str = traceback.format_exception(type(e), e, e.__traceback__)
+
             error_str = ''.join(tb_str)
             self.info_text.insert(tk.END, f"An error occurred during processing:\n{error_str}\n")
             self.info_text.see(tk.END)
-            logging.error(f"Error encountered: {e}")
-
-        jump_cutter_thread = threading.Thread(target=self.execute_jump_cutter, args=(args,))
-        jump_cutter_thread.start()
 
     def run_main_with_progress(self, args):  # Add 'args' as an argument
-        logging.debug("Run button clicked")
         self.run_button.config(state=tk.DISABLED)
         self.progress_bar.start()
         self.info_text.insert(tk.END, "Processing the video...\n")
         self.info_text.see(tk.END)
 
-        try:
-            self.execute_jump_cutter(args)  # Pass the args to execute_jump_cutter
-            self.info_text.insert(tk.END, "Video processing completed successfully.\n")
-            self.info_text.see(tk.END)
-            logging.debug("Successfully executed some code")
-        except Exception as e:
-            tb_str = traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)
-            error_str = ''.join(tb_str)
-            self.info_text.insert(tk.END, f"An error occurred during processing:\n{error_str}\n")
-            self.info_text.see(tk.END)
-            logging.error(f"Error encountered: {e}")
+        def thread_target():
+            try:
+                jump_cutter_main(args)  # Call jump_cutter_main with 'args'
+                self.info_text.insert(tk.END, "Video processing completed successfully.\n")
+                self.info_text.see(tk.END)
+            except Exception as e:
+                tb_str = traceback.format_exception(type(e), e, e.__traceback__)
+                error_str = ''.join(tb_str)
+                self.info_text.insert(tk.END, f"An error occurred during processing:\n{error_str}\n")
+                self.info_text.see(tk.END)
 
-        self.run_button.config(state=tk.NORMAL)
-        self.progress_bar.stop()
+            self.progress_bar.stop()
+            self.run_button.config(state=tk.NORMAL)
+
+        processing_thread = Thread(target=thread_target)
+        processing_thread.start()
 
 
 if __name__ == "__main__":

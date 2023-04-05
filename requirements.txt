@@ -1,0 +1,12 @@
+moviepy==1.0.3
+Pillow==8.4.0
+PyAutoGUI==0.9.52
+PyMsgBox==1.0.9
+PyScreeze==0.1.27
+python-dotenv==0.19.1
+PyTweening==1.0.3
+six==1.16.0
+tk==0.1.0
+numpy==1.24.2
+
+tqdm==4.62.3

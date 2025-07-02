@@ -1,51 +1,71 @@
 
 # JumpCutter GUI  - Documentation
 
+The project provides graphical interfaces to the jumpcutter tool for removing silent parts of videos.
 
-The JumpCutter GUI is built using the Tkinter library, which is a standard Python library for creating graphical user interfaces. The GUI allows users to input parameters, select input and output files, and control the jump cutting process.
+## Tkinter Interface
 
-## Usage ##
-To use JumpCutter, simply run the script, and the GUI will be displayed. The interface consists of several sections for different parameters and settings:
+`jump_cutter_gui.py` implements the original interface using Tkinter. Run the script with Python and the window will appear. All parameters can be adjusted using the form elements and pressing **Run** starts the processing.
 
-Input video: Select the input video file that you want to process.
+## Qt Interface
 
-Output video: Enter the desired output video file name.
+A more polished interface built with PyQt6 is available in `jump_cutter_gui_qt.py`. To use it install the `PyQt6` package and run the script:
 
-Magnitude threshold ratio: Set the threshold for sound magnitude (volume) to determine whether a part is silent or not.
+```bash
+pip install PyQt6
+python jump_cutter_gui_qt.py
+```
 
-Duration threshold: Set the duration threshold to determine the minimum length of a silent part to be removed.
+This version groups options with modern widgets and shows progress and log output.
 
-Failure tolerance ratio: Set the tolerance for detecting and removing silent parts.
+### Packaging for Windows and macOS
 
-Space on edges: Set the amount of space to leave around the edges of a cut.
+You can generate a standalone application using [PyInstaller](https://pyinstaller.org/).
+After installing the dependencies run:
 
-Silence part speed: Set the playback speed for the silent parts (if you want to include them in the output video).
+```bash
+pip install pyinstaller
+pyinstaller --onefile --windowed --icon icon.ico jump_cutter_gui_qt.py
+```
 
-Minimum loud part duration: Set the minimum duration for a loud part to be considered as a separate segment.
+On Windows this creates an `.exe` in the `dist` folder. On macOS the same command
+produces an `.app` bundle that can be copied to the Applications folder.
 
-Codec: Set the codec for the output video file (optional).
+## Usage Overview
 
-Bitrate: Set the bitrate for the output video file (optional).
+Input video: Select the input file to process.
 
-Cut: Choose which parts to remove or include in the output video (silent, voiced, or both).
+Output video: Choose the output file name.
 
-Once you have configured the desired settings, click the "Run" button to start processing the video. A progress bar will indicate the progress of the process.
+Magnitude threshold ratio: Threshold for sound magnitude to determine silence.
 
+Duration threshold: Minimum length of a silent part to be removed.
 
-![image](https://user-images.githubusercontent.com/35880258/227778348-bd7255c9-18d5-4ae4-addb-7847fea20d52.png)
+Failure tolerance ratio: Tolerance for detecting and removing silent parts.
 
-## Code Explanation ##
-The code consists of a main JumpCutterGUI class that handles the creation and management of the GUI components, such as labels, entries, sliders, and buttons. The __init__ method initializes the GUI components and sets up the grid layout.
+Space on edges: Space to leave around the edges of a cut.
 
-The browse_input method allows the user to select an input video file using a file dialog, and the run_jump_cutter method gathers the input parameters and calls the jump_cutter_main function from the jump_cutter_main module to process the video.
+Silence part speed: Playback speed for silent parts when included.
 
-The execute_jump_cutter method is a wrapper for the jump_cutter_main function, which processes the input video file based on the provided arguments and generates the output video file.
+Minimum loud part duration: Minimum duration for a loud part to be considered.
 
-## Acknowledgements ##
+Codec: Optional codec for the output.
+
+Bitrate: Optional bitrate for the output.
+
+Cut: Choose which parts to remove or include (silent, voiced, or both).
+
+Click **Run** to process the video. A progress bar indicates processing and log messages appear below.
+
+## Code Explanation
+
+Both GUI implementations collect the parameters and execute `jump_cutter_main` from `jumpcutter.py` in a background thread so the interface remains responsive.
+
+## Acknowledgements
 We would like to extend our sincerest gratitude to Kivanc Yuksel (emkademy@gmail.com) for creating this useful tool. The original source code can be found at the following repository: https://github.com/kivancyuksel/jumpcutter.git
 
 This software is distributed under the MIT License.
 
-### Contact ###
+### Contact
 If you have any questions, suggestions, or need assistance, please feel free to reach out to me at:
 Email: umut.keltek@gmail.com
